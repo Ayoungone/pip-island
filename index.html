@@ -615,7 +615,7 @@ function normalize(s){const f=freshState();if(!s||typeof s!=="object")return f;c
 try{const raw=localStorage.getItem(LS_KEY);if(raw)state=normalize(JSON.parse(raw))}catch(e){}
 let remote={ref:null,status:"local",writing:false,dirty:false};
 let saveTimer=null;
-function save(){state.updated=Date.now();try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e){}clearTimeout(saveTimer);saveTimer=setTimeout(pushRemote,1500)}
+function save(){state.updated=Date.now();try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e){}clearTimeout(saveTimer);saveTimer=setTimeout(pushRemote,1500);if(typeof window.onPipSaved==="function")try{window.onPipSaved()}catch(e){}}
 async function pushRemote(){
   if(!remote.ref)return; if(remote.writing){remote.dirty=true;return}
   remote.writing=true;remote.dirty=false;
@@ -1227,7 +1227,7 @@ document.getElementById("sUnlock").onclick=e=>{state.settings.unlockAll=!state.s
     catch(e){msg.textContent="That code didn't work. Copy the whole code again, starting with PIP1:, and paste it here."}}})();
 document.getElementById("resetBtn").onclick=()=>{document.getElementById("resetConfirm").hidden=false};
 document.getElementById("resetNo").onclick=()=>{document.getElementById("resetConfirm").hidden=true};
-document.getElementById("resetYes").onclick=()=>{const keep={name:state.name,settings:state.settings};state=freshState();state.name=keep.name;state.settings=keep.settings;save();document.getElementById("resetConfirm").hidden=true;renderParent()};
+document.getElementById("resetYes").onclick=()=>{const keep={name:state.name,settings:state.settings};state=freshState();state.name=keep.name;state.settings=keep.settings;state.resetAt=Date.now();save();document.getElementById("resetConfirm").hidden=true;renderParent()};
 document.getElementById("copyBtn").onclick=async function(){const I=insights();const nm=childName()||"Child";
   let t=`${nm} — learning progress (${new Date().toLocaleDateString()})\n\n`;AREAS.forEach(a=>{t+=`${a.name}: ${Math.round(areaMastery(a.id)*100)}%\n`;skillsOf(a.id).forEach(s=>{t+=`  - ${s.name}: ${statusOf(s)[1]} (${Math.round(skillMastery(s)*100)}%)\n`})});
   if(I.focus.length){t+=`\nFocus areas:\n`;I.focus.forEach(f=>{t+=`  - ${f.s.name}${f.weak.length?": "+f.weak.map(w=>itemLabel(f.s.id+"|"+w.i)).join(", "):""}\n`})}
@@ -1239,9 +1239,10 @@ renderHome();updateSyncNote();initRemote();prefetchSkill(null);
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(current==="pad")setupPad()});
 window.__pip={GEN,SKILLS,buildAdventure,pickItem,record,skillMastery,insights,get state(){return state}};
 </script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
 <script>
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
-// Keep the screen from zooming on double-tap and stop the page from bouncing
 document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
 </script>
 </body>

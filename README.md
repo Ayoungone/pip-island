@@ -45,3 +45,29 @@ so installed copies pick up the new voice files.
 - iPad/iPhone: Settings → Accessibility → Guided Access. Triple-click the side
   button inside the app to lock it there.
 - Android: Settings → Security → App pinning.
+
+## Automatic sync (Firebase)
+
+`firebase-config.js` holds the Firebase web settings. Once it's filled in, each
+device can turn on sync under Grown-ups → "Sync across devices". The first
+device starts sync and gets a family code (PIP-XXXX-XXXX-XXXX-XXXX), and other
+devices join with that code. Progress from every device is merged, not
+overwritten.
+
+Firestore security rules used:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /families/{code} {
+      allow get: if code.matches('PIP-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}');
+      allow create, update: if code.matches('PIP-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}')
+        && request.resource.data.keys().hasOnly(['json', 'updated', 'device'])
+        && request.resource.data.json is string
+        && request.resource.data.json.size() < 900000;
+      allow list, delete: if false;
+    }
+  }
+}
+```
