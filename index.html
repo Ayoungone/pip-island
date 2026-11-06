@@ -1239,7 +1239,7 @@ renderHome();updateSyncNote();initRemote();prefetchSkill(null);
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(current==="pad")setupPad()});
 window.__pip={GEN,SKILLS,buildAdventure,pickItem,record,skillMastery,insights,get state(){return state}};
 </script>
-<script src="firebase-config.js"></script>
+<script src="sync-config.js"></script>
 <script src="sync.js"></script>
 <script>
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
